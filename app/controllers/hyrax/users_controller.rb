@@ -24,7 +24,8 @@ module Hyrax
       # @param query [String] the query string
       def search(query)
         clause = query.blank? ? nil : "%" + query.downcase + "%"
-        base = ::User.where(*base_query) if base_query.present?
+        base = ::User
+        base = base.where(base_query) if base_query.present?
         base = base.where("#{Hydra.config.user_key_field} like lower(?) OR display_name like lower(?)", clause, clause) if clause.present?
         base.registered
             .where("#{Hydra.config.user_key_field} not in (?)",
@@ -35,8 +36,10 @@ module Hyrax
       end
 
       # You can override base_query to return a list of arguments
+      # The override should conform to the expected parameters of an ActiveRecord
+      # #where method call. A Hash would be a reasonable return value.
       def base_query
-        nil
+        {}
       end
 
       def find_user
